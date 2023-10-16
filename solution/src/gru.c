@@ -2,7 +2,10 @@
 
 #include "matrix.h"
 #include "gru.h"
+
+#ifdef EMBED_WEIGHTS
 #include "embed_gru.h"
+#endif
 
 
 GRU* createGRU(const char* path) {

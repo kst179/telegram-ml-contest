@@ -1,7 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
 
 #ifndef TOKENIZER_H
 #define TOKENIZER_H
@@ -26,7 +23,7 @@ PrefixTree* getTokenizerNode(Tokenizer* tokenizer, PrefixTree* node);
 
 void createNode(PrefixTree** node);
 void buildPrefixTree(PrefixTree** root, int num_tokens, char** tokens);
-void freePrefixTree(PrefixTree** root);
+void freePrefixTree(PrefixTree* root);
 
 Tokenizer* createDefaultTokenizer();
 Tokenizer* createTokenizer(const char* vocab_path);

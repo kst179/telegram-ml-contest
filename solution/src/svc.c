@@ -2,7 +2,10 @@
 
 #include "matrix.h"
 #include "svc.h"
+
+#ifdef EMBED_WEIGHTS
 #include "embed_svc.h"
+#endif
 
 SVC* createDefaultSVC() {
     const char* path = "resources/svc_coefs.bin";
@@ -28,11 +31,13 @@ SVC* createSVC(const char* path) {
 
     svc->token_weights = createMatrix(num_tokens, num_classes);
     svc->gru_features_weights = createMatrix(num_classes, gru_hid_dim);
+    svc->bias = createMatrix(1, num_classes);
 
     svc->scores = createMatrix(1, num_classes);
 
     fread(svc->token_weights.data, sizeof(float), matSize(svc->token_weights), file);
     fread(svc->gru_features_weights.data, sizeof(float), matSize(svc->gru_features_weights), file);
+    fread(svc->bias.data, sizeof(float), matSize(svc->bias), file);
     fclose(file);
 
     return svc;
@@ -51,16 +56,18 @@ int predictSVC(SVC* svc, int* tokens, int num_tokens, Matrix gru_last_state) {
     matInplaceScalarProd(svc->scores, 1.0f / (float)num_tokens);
 
     matVecProduct(svc->gru_features_weights, gru_last_state, svc->scores);
+    matSum(svc->bias, svc->scores, svc->scores);
 
     return vecArgmax(svc->scores);
 }
 
-void freeSVC(SVC** classifier) {
-    freeMatrix((*classifier)->scores);
-    freeMatrix((*classifier)->token_weights);
-    freeMatrix((*classifier)->gru_features_weights);
-    free(*classifier);
-    (*classifier) = NULL;
+void freeSVC(SVC** svc) {
+    freeMatrix((*svc)->scores);
+    freeMatrix((*svc)->token_weights);
+    freeMatrix((*svc)->gru_features_weights);
+    freeMatrix((*svc)->bias);
+    free(*svc);
+    (*svc) = NULL;
 }
 
 void saveEmbedSVC(SVC* svc, const char* path) {
@@ -79,7 +86,10 @@ void saveEmbedSVC(SVC* svc, const char* path) {
     svc_copy.gru_features_weights.data = (float*)offset; 
     offset += matSizeBytes(svc->gru_features_weights);
 
-    svc_copy.scores.data = (float*)offset; 
+    svc_copy.bias.data = (float*)offset;
+    offset += matSizeBytes(svc->bias);
+
+    svc_copy.scores.data = (float*)offset;
     offset += matSizeBytes(svc->scores);
 
     offset = sizeof(SVC);
@@ -106,6 +116,11 @@ void saveEmbedSVC(SVC* svc, const char* path) {
         if (j++ % 16 == 0) { fprintf(file, "\n"); }
     }
 
+    for(int i = 0; i < matSize(svc->bias); i++) {
+        fprintf(file, "0x%08X,", ((unsigned int*)svc->bias.data)[i]);
+        if (j++ % 16 == 0) { fprintf(file, "\n"); }
+    }
+
     for(int i = 0; i < matSize(svc->scores); i++) {
         fprintf(file, "0x%08X,", 0u);
         if (j++ % 16 == 0) { fprintf(file, "\n"); }
@@ -121,6 +136,7 @@ SVC* loadEmbedSVC() {
     SVC* svc = (SVC*)SVC_DATA;
     svc->token_weights.data = (float*)((unsigned char*)SVC_DATA + (size_t)svc->token_weights.data);
     svc->gru_features_weights.data = (float*)((unsigned char*)SVC_DATA + (size_t)svc->gru_features_weights.data);
+    svc->bias.data = (float*)((unsigned char*)SVC_DATA + (size_t)svc->bias.data);
     svc->scores.data = (float*)((unsigned char*)SVC_DATA + (size_t)svc->scores.data);
 
     return svc;

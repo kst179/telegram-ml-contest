@@ -1,11 +1,12 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include <time.h>
+#include <stdlib.h>
 
 #include "tokenizer.h"
-#include "embed_tokenizer.h"
 
+#ifdef EMBED_WEIGHTS
+#include "embed_tokenizer.h"
+#endif
 
 void createNode(PrefixTree** node) {
     *node = malloc(sizeof(PrefixTree));
@@ -34,17 +35,14 @@ void buildPrefixTree(PrefixTree** root, int num_tokens, char** tokens) {
     }
 }
 
-void freePrefixTree(PrefixTree** root) {
-    if (*root == NULL) {
-        return;
-    }
-
+void freePrefixTree(PrefixTree* root) {
     for (int i = 0; i < 256; ++i) {
-        freePrefixTree(&(*root)->children[i]);
+        if (root->children[i] != NULL) {
+            freePrefixTree(root->children[i]);
+        }
     }
 
-    free(*root);
-    *root = NULL;
+    free(root);
 }
 
 void initTokenizer(Tokenizer** tokenizer_p, const char* vocab_path) {
@@ -79,16 +77,12 @@ void initTokenizer(Tokenizer** tokenizer_p, const char* vocab_path) {
     }
 
     tokenizer->num_tokens = num_tokens;
-    // tokenizer->data = data;
-    // tokenizer->tokens = tokens;
 
     buildPrefixTree(&tokenizer->prefix_tree, num_tokens, tokens);
 }
 
 void freeTokenizer(Tokenizer** tokenizer) {
-    freePrefixTree(&(*tokenizer)->prefix_tree);
-    // free((*tokenizer)->tokens);
-    // free((*tokenizer)->data);
+    freePrefixTree((*tokenizer)->prefix_tree);
     free(*tokenizer);
     *tokenizer = NULL;
 }
@@ -199,18 +193,20 @@ void saveEmbedTokenizer(Tokenizer* tokenizer, const char* path) {
         PrefixTree* node = nodes[head++];
         head %= QUEUE_SIZE;
 
+        PrefixTree node_copy = *node;
+
         for (int i = 0; i < 256; ++i) {
             if (node->children[i] != NULL) {
                 nodes[tail++] = node->children[i];
                 tail %= QUEUE_SIZE;
 
-                node->children[i] = (PrefixTree*)offset;
+                node_copy.children[i] = (PrefixTree*)offset;
                 offset += sizeof(PrefixTree);
             }
         }
 
         for(int i = 0; i < sizeof(PrefixTree) / 4; i++) {
-            fprintf(file, "0x%08X,", ((unsigned int*)node)[i]);
+            fprintf(file, "0x%08X,", ((unsigned int*)&node_copy)[i]);
             if (j++ % 16 == 0) { fprintf(file, "\n"); }
         }
     }
