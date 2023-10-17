@@ -1,6 +1,6 @@
 # Telegram Programming Language Detection ML Contest
 
-This repo contains my solution of TG ML contest.
+This repo contains my solution of [TG ML contest](https://contest.com/docs/ML-Competition-2023).
 
 ## Task
 The task was to define the programming language only by the code snippet. The inference should be fast: the text of **4096 bytes** should be processed in less than **10 ms**.
