@@ -3,7 +3,6 @@ from pathlib import Path
 
 import numpy as np
 import torch
-
 from ctokenizer import CTokenizer
 from languages_list import Languages
 

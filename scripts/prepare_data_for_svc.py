@@ -1,11 +1,10 @@
 import numpy as np
+from cgru import CGRU
+from gh_dataset import GHDataset
 from scipy.sparse import csr_array
 from scipy.sparse import hstack as sparse_hstack
 from scipy.sparse import save_npz
 from tqdm import tqdm
-
-from cgru import CGRU
-from gh_dataset import GHDataset
 
 
 def normalize_sparse_mat(x):

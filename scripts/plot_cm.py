@@ -1,8 +1,7 @@
 import matplotlib
 import numpy as np
-from matplotlib import pyplot as plt
-
 from languages_list import Languages
+from matplotlib import pyplot as plt
 
 
 def plot_confusion_matrix(

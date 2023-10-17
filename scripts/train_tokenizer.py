@@ -1,6 +1,9 @@
-from tokenizers import ByteLevelBPETokenizer
-
 from gh_dataset import GHDataset
+from tokenizers import ByteLevelBPETokenizer
+from pathlib import Path
+
+output_dir = Path("../artifacts")
+output_dir.mkdir(exist_ok=True)
 
 dataset = GHDataset()
 paths = [file.as_posix() for file in dataset.files]
@@ -21,4 +24,4 @@ tokenizer.train(
     show_progress=True,
 )
 
-tokenizer.save_model("../artifacts", "tokenizer")
+tokenizer.save_model(output_dir.as_posix(), "tokenizer")

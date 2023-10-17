@@ -2,12 +2,11 @@ from pathlib import Path
 
 import torch
 import tqdm
+from gh_dataset import GHDataset
 from tensorboardX import SummaryWriter
 from tokenizers import ByteLevelBPETokenizer
 from torch import nn
 from torch.utils.data.dataloader import DataLoader
-
-from gh_dataset import GHDataset
 
 tokenizer = ByteLevelBPETokenizer(
     "../artifacts/tokenizer-vocab.json", "../artifacts/tokenizer-merges.txt"

@@ -105,3 +105,22 @@ The compilation with weights embedding will take some time, however the resultin
 I have not performed some advanced analysis of the solution, only the total accuracy score was calculated as well as per-language precision (presented in the table above) and the confusion matrix, which goes below. Notice that the heatmap calculated in log scale for near-zero values to be in contrast with the purely white zero cells.
 
 ![image](images/confusion_matrix.png)
+
+## Training your own model
+
+The results can be reproduced using python scripts in the `./scripts/` directory. The original training pipeline described below:
+
+1. Download data and place them into the `./data/` directory
+2. Run `./scripts/create_dataset_splits.py` to create split file. The dataset is splitted equally into 3 parts: `train_gru`, `train_svc`, and `test`. To avoid data leaks we do not train GRU and SVM on the same data.
+3. Train BPE tokenizer on the data `./scripts/train_tokenizer.py`
+4. Transform tokens from text `./artifacts/tokenizer-vocab.json` and `./artifacts/tokenizer-merges.txt` to the binary file `./solution/resources/tokenizer_vocab.bin` with `./scripts/transform_tokenizer.py` script.
+5. Compile C inference lib (if you haven't done it yet) as described above
+6. Train GRU with `./scripts/train_gru.py` script.
+7. Transform pytorch state dict to binary weights, using `./scripts/transform_gru.py`, the `./solution/resources/gru_weights.bin` will be created. Select the best epoch and set path to it to `model_path` variable in the script, before running it
+8. (optional) Test C implementation of GRU with imported weights on the full test set. It should be close to validation metrics seen during training
+9. Run `./scirpts/prepare_data_for_svc.py`, this script will create sparse matrices with token frequencies and last GRU states for SVM training
+10. Train SVM: `./scripts/train_svc.py`, script will train several versions of svc model on the parameter grid, all of them will be tested on the test split, and saved in `./artifacts`, with parameters/resulting accuracy in name
+11. Select the optimal SVC, and transform it's weights from pickle format to binary `./solution/resources/svc_weights.bin`
+12. Run the `./scripts/test_final_model.py` to get the final model's accuracy and confusion matrix
+13. (optional) Run the `./scripts/plot_cm.py` to draw the confusion matrix
+14. (optional) Recompile library with the embedded weights

@@ -1,8 +1,7 @@
 import numpy as np
-from tqdm import tqdm
-
 from cgru import CGRU
 from gh_dataset import GHDataset
+from tqdm import tqdm
 
 gru = CGRU(
     weights_path="../solution/resources/gru_weights.bin",

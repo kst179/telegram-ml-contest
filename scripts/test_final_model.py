@@ -1,12 +1,11 @@
 import ctypes
 
 import numpy as np
+from gh_dataset import GHDataset
+from languages_list import Languages
 from matplotlib import pyplot as plt
 from sklearn.metrics import accuracy_score, confusion_matrix
 from tqdm import tqdm
-
-from gh_dataset import GHDataset
-from languages_list import Languages
 
 
 class CTGLang:

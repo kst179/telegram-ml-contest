@@ -1,10 +1,9 @@
 from collections import Counter
 
 import numpy as np
-from matplotlib import pyplot as plt
-
 from gh_dataset import GHDataset
 from languages_list import Languages
+from matplotlib import pyplot as plt
 
 dataset = GHDataset()
 
