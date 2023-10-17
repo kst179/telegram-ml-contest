@@ -1,10 +1,13 @@
-from gh_dataset import GHDataset
-from cgru import CGRU
-from tqdm import tqdm
 import numpy as np
+from tqdm import tqdm
 
-gru = CGRU(weights_path="../solution/resources/gru_weights.bin",
-           libpath="../solution/build/libgru.so")
+from cgru import CGRU
+from gh_dataset import GHDataset
+
+gru = CGRU(
+    weights_path="../solution/resources/gru_weights.bin",
+    libpath="../solution/build/libgru.so",
+)
 
 test_dataset = GHDataset(split="test", tokenize=True, subsample_lines=True)
 

@@ -1,20 +1,16 @@
-from tensorboardX import SummaryWriter 
+from pathlib import Path
 
 import torch
+import tqdm
+from tensorboardX import SummaryWriter
+from tokenizers import ByteLevelBPETokenizer
 from torch import nn
 from torch.utils.data.dataloader import DataLoader
 
-from tokenizers import ByteLevelBPETokenizer
-
 from gh_dataset import GHDataset
 
-from pathlib import Path
-
-import tqdm
-
 tokenizer = ByteLevelBPETokenizer(
-    "../artifacts/tokenizer-vocab.json", 
-    "../artifacts/tokenizer-merges.txt"
+    "../artifacts/tokenizer-vocab.json", "../artifacts/tokenizer-merges.txt"
 )
 
 output_dir = Path("../artifacts/gru_weights")
@@ -22,6 +18,7 @@ output_dir.mkdir(exist_ok=True, parents=True)
 
 pad_token = tokenizer.token_to_id("<pad>")
 max_seq_len = 8192
+
 
 class Batch(dict):
     def __init__(self, dict):
@@ -38,27 +35,30 @@ class Batch(dict):
 
         return self
 
+
 def collate_fn(batch):
     ids, labels = zip(*batch)
-    
+
     max_len = max(len(i) for i in ids)
     max_len = min(max_len, max_seq_len)
     max_len = (max_len + 15) // 16 * 16
 
-    ids = torch.tensor([
-        i[:max_len] + [pad_token for j in range(max_len - len(i))]
-        for i in ids
-    ])
+    ids = torch.tensor(
+        [i[:max_len] + [pad_token for j in range(max_len - len(i))] for i in ids]
+    )
     mask = ids != pad_token
     last_element = mask.sum(dim=1) - 1
     labels = torch.tensor([label.value - 1 for label in labels])
 
-    return Batch({
-        "ids": ids,
-        "mask": mask,
-        "last_element": last_element,
-        "labels": labels, 
-    })
+    return Batch(
+        {
+            "ids": ids,
+            "mask": mask,
+            "last_element": last_element,
+            "labels": labels,
+        }
+    )
+
 
 class Network(nn.Module):
     def __init__(self):
@@ -68,8 +68,7 @@ class Network(nn.Module):
         self.classifier = nn.Linear(96, 100)
 
     def forward(self, ids, last_elements, return_last_feature=False):
-        """ ids: [batch_size, seq_len]
-        """
+        """ids: [batch_size, seq_len]"""
         batch_size = ids.shape[0]
 
         # [batch_size, seq_len, emb_dim]
@@ -85,14 +84,19 @@ class Network(nn.Module):
 
         if not return_last_feature:
             return logits
-        
+
         return logits, last_feature
-     
+
+
 train_dataset = GHDataset(split="train_gru", tokenize=True, subsample_lines=True)
 val_dataset = GHDataset(split="test", tokenize=True, subsample_lines=True)
 
-train_dataloader = DataLoader(train_dataset, batch_size=16, shuffle=True, collate_fn=collate_fn)
-val_dataloader = DataLoader(val_dataset, batch_size=16, shuffle=False, collate_fn=collate_fn)
+train_dataloader = DataLoader(
+    train_dataset, batch_size=16, shuffle=True, collate_fn=collate_fn
+)
+val_dataloader = DataLoader(
+    val_dataset, batch_size=16, shuffle=False, collate_fn=collate_fn
+)
 
 
 model = Network()
@@ -131,7 +135,7 @@ for epoch in tqdm.trange(200):
     cross_entropy.reduction = "sum"
     for batch, _ in zip(val_dataloader, tqdm.trange(1000)):
         batch.to("cuda")
-        
+
         with torch.no_grad():
             logits = model(batch["ids"], batch["last_element"])
 

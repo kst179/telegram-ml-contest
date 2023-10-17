@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class Languages(Enum):
     OTHER = 0
     ONES_ENTERPRISE = 1
@@ -105,13 +106,14 @@ class Languages(Enum):
     @staticmethod
     def from_string(s):
         return string_to_enum[s]
-    
+
     @staticmethod
     def to_string(e):
         if isinstance(e, int):
             e = Languages(e)
 
         return enum_to_string[e]
+
 
 enum_to_string = {
     Languages.OTHER: "Other",

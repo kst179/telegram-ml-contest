@@ -1,13 +1,15 @@
-from gh_dataset import GHDataset
-import numpy as np
-from tqdm import tqdm
 import ctypes
 
-from sklearn.metrics import accuracy_score, confusion_matrix
+import numpy as np
 from matplotlib import pyplot as plt
+from sklearn.metrics import accuracy_score, confusion_matrix
+from tqdm import tqdm
+
+from gh_dataset import GHDataset
 from languages_list import Languages
 
-class CTGLang():
+
+class CTGLang:
     def __init__(self):
         self.lib = ctypes.CDLL("../solution/build/libtglang.so")
         self.lib.tglang_detect_programming_language.argtypes = [ctypes.c_char_p]
@@ -15,6 +17,7 @@ class CTGLang():
 
     def __call__(self, string):
         return self.lib.tglang_detect_programming_language(string.encode())
+
 
 if __name__ == "__main__":
     model = CTGLang()
@@ -34,7 +37,7 @@ if __name__ == "__main__":
         if i % 500 == 0:
             acc = accuracy_score(labels, predictions)
             pbar.set_description(f"acc: {acc:.5}")
-        
+
     labels = np.array(labels)
     predictions = np.array(predictions)
 

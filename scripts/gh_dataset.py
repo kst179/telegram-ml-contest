@@ -1,20 +1,23 @@
-import torch
-import numpy as np
 import json
-
 from pathlib import Path
 
-from languages_list import Languages
+import numpy as np
+import torch
+
 from ctokenizer import CTokenizer
+from languages_list import Languages
+
 
 class GHDataset(torch.utils.data.Dataset):
-    def __init__(self, 
-                 dir=Path("../data/files"), 
-                 split_file=Path("../data/splits.json"),
-                 split=None,
-                 tokenize=False, 
-                 subsample_lines=False, 
-                 max_num_lines=1024):
+    def __init__(
+        self,
+        dir=Path("../data/files"),
+        split_file=Path("../data/splits.json"),
+        split=None,
+        tokenize=False,
+        subsample_lines=False,
+        max_num_lines=1024,
+    ):
         self.dir = dir
         self.subsample_lines = subsample_lines
         self.max_num_lines = max_num_lines
@@ -26,10 +29,9 @@ class GHDataset(torch.utils.data.Dataset):
             self.files = sorted(Path(file) for file in splits[split])
         else:
             self.files = sorted(dir.glob("*/*"))
-        
+
         self.labels = [
-            Languages.from_string(filepath.parent.name)
-            for filepath in self.files
+            Languages.from_string(filepath.parent.name) for filepath in self.files
         ]
 
         self.tokenize = tokenize
@@ -50,8 +52,8 @@ class GHDataset(torch.utils.data.Dataset):
                 for _ in range(5):
                     size = np.random.randint(1, min(len(lines), self.max_num_lines))
                     first = np.random.randint(0, len(lines) - size)
-                
-                    content = "\n".join(lines[first:first+size]).strip()
+
+                    content = "\n".join(lines[first : first + size]).strip()
                     if content:
                         break
 

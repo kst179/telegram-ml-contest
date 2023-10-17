@@ -1,8 +1,10 @@
 import torch
 from torch import nn
+
 from ctokenizer import CTokenizer
 
 tokenizer = CTokenizer()
+
 
 class Network(nn.Module):
     def __init__(self):
@@ -12,8 +14,7 @@ class Network(nn.Module):
         self.classifier = nn.Linear(96, 100)
 
     def forward(self, ids, last_elements, return_last_state=False):
-        """ ids: [batch_size, seq_len]
-        """
+        """ids: [batch_size, seq_len]"""
         batch_size = ids.shape[0]
 
         # [batch_size, seq_len, emb_dim]
@@ -31,6 +32,7 @@ class Network(nn.Module):
             return logits, last_feature
 
         return logits
+
 
 state_dict = torch.load("../artifacts/gru_weights/model_88.pth", map_location="cpu")
 model = Network()
@@ -54,13 +56,13 @@ classifier_bias = torch.nn.functional.pad(classifier_bias, (0, 4), value=-torch.
 embeddings_ = embeddings @ weights_i.T + bias_i
 
 num_embeddings, hidden_dim = embeddings.shape
-num_classes, = classifier_bias.shape
+(num_classes,) = classifier_bias.shape
 
 with open("../solution/resources/gru_weights.bin", "wb") as file:
     file.write(hidden_dim.to_bytes(length=4, byteorder="little"))
     file.write(num_embeddings.to_bytes(length=4, byteorder="little"))
     file.write(num_classes.to_bytes(length=4, byteorder="little"))
-    
+
     file.write(embeddings_.numpy().tobytes())
     file.write(weights_h.numpy().tobytes())
     file.write(bias_h.numpy().tobytes())

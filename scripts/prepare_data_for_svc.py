@@ -13,15 +13,19 @@ def normalize_sparse_mat(x):
     x.data = x.data / np.repeat(row_sum, np.diff(x.indptr))
     return x
 
-gru = CGRU(weights_path="../solution/resources/gru_weights.bin",
-           libpath="../solution/build/libgru.so")
+
+gru = CGRU(
+    weights_path="../solution/resources/gru_weights.bin",
+    libpath="../solution/build/libgru.so",
+)
 
 train_data = GHDataset(split="train_svc", tokenize=True, subsample_lines=True)
 val_data = GHDataset(split="test", tokenize=True, subsample_lines=True)
 
-for dataset, name in ((train_data, "../artifacts/svc_train.npz"), 
-                      (val_data, "../artifacts/svc_val.npz")):
-    
+for dataset, name in (
+    (train_data, "../artifacts/svc_train.npz"),
+    (val_data, "../artifacts/svc_val.npz"),
+):
     num_rows = len(dataset)
     num_cols = 2**15
 
@@ -52,4 +56,3 @@ for dataset, name in ((train_data, "../artifacts/svc_train.npz"),
 
     save_npz(name, data_matrix)
     del data_matrix  # free some memory cause even sparse matrices are quite big
-

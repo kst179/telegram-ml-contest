@@ -1,16 +1,21 @@
-from matplotlib import pyplot as plt
 import matplotlib
-from languages_list import Languages   
-import numpy as np 
+import numpy as np
+from matplotlib import pyplot as plt
+
+from languages_list import Languages
 
 
-def plot_confusion_matrix(cm, classes, normalize=False, title='Confusion Matrix', cmap=plt.cm.Blues):
+def plot_confusion_matrix(
+    cm, classes, normalize=False, title="Confusion Matrix", cmap=plt.cm.Blues
+):
     log_cm = np.log(1 + cm)
-    
+
     plt.figure(figsize=(30, 30), dpi=200)
-    im = plt.imshow(cm, interpolation='nearest', cmap=cmap, norm=matplotlib.colors.LogNorm())
+    im = plt.imshow(
+        cm, interpolation="nearest", cmap=cmap, norm=matplotlib.colors.LogNorm()
+    )
     plt.title(title)
-    cbar = plt.colorbar(im,fraction=0.046, pad=0.04)
+    cbar = plt.colorbar(im, fraction=0.046, pad=0.04)
     cbar.ax.tick_params(labelsize=24)
 
     if classes is not None:
@@ -20,10 +25,10 @@ def plot_confusion_matrix(cm, classes, normalize=False, title='Confusion Matrix'
         plt.tick_params(labeltop=True, labelright=True)
 
     if normalize:
-        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+        cm = cm.astype("float") / cm.sum(axis=1)[:, np.newaxis]
         print("Normalized confusion matrix")
     else:
-        print('Confusion matrix, without normalization')
+        print("Confusion matrix, without normalization")
 
     print(cm)
 
@@ -32,7 +37,6 @@ def plot_confusion_matrix(cm, classes, normalize=False, title='Confusion Matrix'
         for j in range(cm.shape[1]):
             if cm[i, j] == 0:
                 continue
-
 
             fontsize = 10
             text = str(cm[i, j])
@@ -43,20 +47,23 @@ def plot_confusion_matrix(cm, classes, normalize=False, title='Confusion Matrix'
                 text = f"{cm[i, j]/1000:.1f}K"
                 fontsize = 7
 
-            plt.text(j, i+0.2, text, fontsize=fontsize,
-                    horizontalalignment="center",
-                    color="white" if log_cm[i, j] > thresh else "black")
+            plt.text(
+                j,
+                i + 0.2,
+                text,
+                fontsize=fontsize,
+                horizontalalignment="center",
+                color="white" if log_cm[i, j] > thresh else "black",
+            )
 
     plt.tight_layout()
-    plt.ylabel('True label')
-    plt.xlabel('Predicted label')
+    plt.ylabel("True label")
+    plt.xlabel("Predicted label")
+
 
 cm = np.load("../artifacts/confusion_matrix.npy")
 
-classes = np.array([
-    Languages.to_string(i)
-    for i in range(len(Languages))
-])
+classes = np.array([Languages.to_string(i) for i in range(len(Languages))])
 
 order = np.argsort(-cm.sum(axis=1))
 
