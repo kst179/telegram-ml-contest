@@ -73,7 +73,7 @@ void initTokenizer(Tokenizer** tokenizer_p, const char* vocab_path) {
     fclose(file);
 
     for (int i = 0; i < num_tokens; ++i) {
-        tokens[i] = (long long int)tokens[i] + &data[0];
+        tokens[i] = (size_t)tokens[i] + &data[0];
     }
 
     tokenizer->num_tokens = num_tokens;
