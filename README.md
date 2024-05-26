@@ -34,7 +34,7 @@ Total accuracy is about **94.1%** on my data.
 
 ## Dataset 
 
-[Here is the dataset](https://disk.yandex.ru/d/PSVcZTZYfCbhng) which I used in my solution. It was made using [guesslang tool](https://github.com/yoeo/guesslangtools) for the most common languages, and my own scripts for github scraping. The scraping follows the pipeline:
+[Here is the dataset](https://disk.yandex.ru/d/qpA-jHCsdS5kiw) which I used in my solution. It was made using [guesslang tool](https://github.com/yoeo/guesslangtools) for the most common languages, and my own scripts for github scraping. The scraping follows the pipeline:
 * Search for a repositories in specific language on the Github, and save list of repositories. For languages that cannot be found via github search directly, the repos were collected by file extensions, or specific keyword searches (like "TON" for FIFT and FunC langs for example) 
 * Download all repositories
 * Extract only those files that have specific file extension suffixes corresponding to the programming language.
